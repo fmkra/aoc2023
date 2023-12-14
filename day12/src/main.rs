@@ -1,5 +1,6 @@
 use std::fs;
 use rayon::prelude::*;
+use std::collections::HashMap;
 
 fn f(board: Vec<char>, start: usize, pattern: Vec<usize>, acc: &mut u64) {
     // let board_str = board.clone().into_iter().collect::<String>();
@@ -107,12 +108,39 @@ fn count_patterns(input: String) -> u64 {
     acc
 }
 
+// fn main() {
+//     let file = fs::read_to_string("data.txt").expect("Unable to read file");
+
+//     let sum: u64 = file.par_lines()
+//         .map(|line| count_patterns(line.to_string()))
+//         .sum();
+
+//     println!("sum = {}", sum);
+// }
+
 fn main() {
-    let file = fs::read_to_string("data.txt").expect("Unable to read file");
+    let partial_result = fs::read_to_string("partial results.txt").expect("Unable to read partial results file");
 
-    let sum: u64 = file.par_lines()
-        .map(|line| count_patterns(line.to_string()))
-        .sum();
+    let results = fs::read_to_string("results.txt").expect("Unable to read results file");
 
-    println!("sum = {}", sum);
+    let mut map_results = HashMap::new();
+    partial_result.lines().for_each(|line| {
+        let mut splited = line.split(" = ");
+        let key = splited.next().unwrap();
+        let value = splited.next().unwrap();
+        map_results.insert(key.to_string(), value.to_string());
+    });
+
+    let results = results.lines().map(|line| {
+        let mapped = map_results.get(line);
+        if mapped.is_some() {
+            line.to_string() + " = " + mapped.unwrap()
+        } else {
+            line.to_string()
+        }
+    });
+
+    results.for_each(|line| {
+        println!("{}", line);
+    })
 }

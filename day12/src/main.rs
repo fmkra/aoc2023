@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::Write;
 use rayon::prelude::*;
 use std::collections::HashMap;
 
@@ -140,7 +141,11 @@ fn main() {
         }
     });
 
-    results.for_each(|line| {
-        println!("{}", line);
-    })
+    // write to file
+
+    let mut file = fs::File::create("results.txt").expect("Unable to create file");
+    for result in results {
+        file.write_all(result.as_bytes()).expect("Unable to write data");
+        file.write_all("\n".as_bytes()).expect("Unable to write data");
+    }
 }

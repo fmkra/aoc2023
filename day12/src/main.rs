@@ -1,4 +1,5 @@
 use std::fs;
+use rayon::prelude::*;
 
 fn f(board: Vec<char>, start: usize, pattern: Vec<usize>, acc: &mut u64) {
     // let board_str = board.clone().into_iter().collect::<String>();
@@ -102,17 +103,16 @@ fn count_patterns(input: String) -> u64 {
     let pattern = pattern_str.split(",").map(|x| x.parse::<usize>().unwrap()).collect::<Vec<usize>>();
     let mut acc = 0;
     f(board.chars().collect(), 0, pattern, &mut acc);
+    println!("{} = {}", input, acc);
     acc
 }
 
 fn main() {
     let file = fs::read_to_string("data.txt").expect("Unable to read file");
 
-    let mut sum: u64 = 0;
-    file.lines().map(|line| count_patterns(line.to_string())).enumerate().for_each(|(i,x)| {
-        println!("{} {}", i, x);
-        sum += x;
-    });
+    let sum: u64 = file.par_lines()
+        .map(|line| count_patterns(line.to_string()))
+        .sum();
 
     println!("sum = {}", sum);
 }
